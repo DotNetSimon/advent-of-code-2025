@@ -1,30 +1,51 @@
+import kotlin.math.abs
+
 /**
  * Day 1 class, should solve the puzzle A and puzzle B for you.
  */
 class Day1 : Day {
 
-    private val digits = "1234567890"
-    private val digitWords = listOf("0","1","2","3","4","5","6","7","8","9","zero","one","two","three","four","five","six","seven","eight","nine")
-
     override fun puzzleA(data: List<String>): String {
-        return data.map { line ->
-                val first = line.first { digits.contains(it) }.toString()
-                val second = line.last { digits.contains(it) }.toString()
-                (first + second).toInt()
-        }.sum().toString()
+        var current = 50
+        var countZero = 0
+        data.forEach {
+            val direction = it.first()
+            val step = it.drop(1).toInt()
+            // negative should be 100-?
+            if (direction == 'L') current -= step
+            else current += step
+
+            current = (current + 100) % 100
+
+            if (current == 0) { countZero++}
+        }
+        return countZero.toString()
     }
 
     override fun puzzleB(data: List<String>): String {
-        return data.map { line ->
-            val firstWordIndex = line.indexOfAny(digitWords)
-            val lastWordIndex = line.lastIndexOfAny(digitWords)
+        var current = 50
+        var countZero = 0
+        var prev = 50
+        data.forEach {
+            prev = current
+            val direction = it.first()
+            var step = it.drop(1).toInt()
 
-            val first = if (digits.contains(line[firstWordIndex])) line[firstWordIndex].toString()
-                else (digitWords.indexOfFirst{it.contains(line.substring(firstWordIndex, firstWordIndex+2))}%10).toString()
-            val second = if (digits.contains(line[lastWordIndex])) line[lastWordIndex].toString()
-                else (digitWords.indexOfFirst{it.contains(line.substring(lastWordIndex, lastWordIndex+2))}%10).toString()
+            val fullRotations = abs(step / 100)
+            countZero += fullRotations
+            step = step % 100
 
-            (first + second).toInt()
-        }.sum().toString()
+            if (step != 0) {
+                if (direction == 'L') current -= step
+                else current += step
+
+                if (current !in 1 until 100 && prev != 0) {
+                    countZero++
+                }
+                current = (current + 100) % 100
+            }
+        }
+        return countZero.toString()
+
     }
 }
